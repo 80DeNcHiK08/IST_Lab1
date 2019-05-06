@@ -4,26 +4,55 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using server.Interfaces;
 using server.Models;
+using server.Services;
 
 namespace server.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IUserService _service;
+        public HomeController(IUserService service)
+        {
+            _service = service;
+        }
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Privacy()
+        [HttpGet]
+        public IActionResult SignIn()
         {
-            return View();
+            return Redirect("/Home/Index");            
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [HttpPost]
+        public async Task<IActionResult> SignIn(string email, string password)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            await _service.SignIn(email, password);
+            return Redirect("/Home/Index");
+        }
+
+        [HttpGet]
+        public IActionResult SignUp()
+        {
+            return Redirect("/Home/Index");            
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SignUp(string email, string password)
+        {
+            await _service.AddUser(email, password);
+            return Redirect("/Home/Index");            
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LogOut()
+        {
+            await _service.LogOut();
+            return Redirect("/Home/Index"); 
         }
     }
 }
